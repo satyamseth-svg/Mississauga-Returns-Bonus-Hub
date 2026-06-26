@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Returns Team — Bonus Hub (Shared)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --pr:#4f46e5;--pr-d:#4338ca;--ok:#059669;--warn:#d97706;--bad:#dc2626;
+  --bg:#f0f2f5;--card:#fff;--inner:#f8fafc;--bdr:#e2e8f0;
+  --txt:#0f172a;--muted:#64748b;--muted2:#94a3b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ── TOPNAV ── */
+.nav{display:flex;align-items:center;background:linear-gradient(135deg,#1e1b4b,#312e81);padding:0 24px;height:58px;gap:10px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.nav-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.nav-logo{font-size:24px}
+.nav-title{font-size:15px;font-weight:800;color:#fff}
+.nav-sub{font-size:10px;color:#a5b4fc;font-weight:600;margin-top:1px}
+.nbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);font-family:'Inter',sans-serif;white-space:nowrap;transition:all .15s}
+.nbtn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4)}
+.nbtn.green{background:rgba(16,185,129,.2);border-color:rgba(16,185,129,.5);color:#6ee7b7}
+.nbtn.green:hover{background:rgba(16,185,129,.35)}
+.nbtn.violet{background:rgba(139,92,246,.35);border-color:rgba(139,92,246,.6);color:#c4b5fd}
+.nbtn.violet:hover{background:rgba(139,92,246,.5)}
+.nbtn.teal{background:rgba(6,182,212,.25);border-color:rgba(6,182,212,.5);color:#67e8f9}
+.nbtn.teal:hover{background:rgba(6,182,212,.4)}
+
+/* ── MAIN ── */
+.main{padding:22px 24px 80px;max-width:1500px;margin:0 auto}
+
+/* ── OVERVIEW CARDS ── */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.ov{background:var(--card);border-radius:14px;border:1px solid var(--bdr);padding:16px 20px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.ov::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--b))}
+.ov-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+.ov-val{font-size:26px;font-weight:900;letter-spacing:-1px;font-family:'Space Mono',monospace}
+.ov-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ── CHART ── */
+.chart-card{background:var(--card);border-radius:16px;border:1px solid var(--bdr);padding:22px 24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.chart-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.chart-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.chart-total{font-size:22px;font-weight:900;color:var(--txt);margin-top:3px;font-family:'Space Mono',monospace}
+.chart-meta{font-size:12px;color:var(--muted);text-align:right}
+.bars-area{display:flex;align-items:flex-end;gap:8px;height:180px;padding-left:44px;position:relative}
+.glines{position:absolute;inset:0;left:44px;pointer-events:none}
+.gl{position:absolute;left:0;right:0;border-top:1px dashed #f3f4f6}
+.gl-lbl{font-size:9.5px;color:#d1d5db;position:absolute;left:-42px;transform:translateY(-50%);white-space:nowrap}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer}
+.bar-col:hover .bar-rect{filter:brightness(.88)}
+.bar-col.sel .bar-rect{background:linear-gradient(180deg,#4f46e5,#3730a3)!important}
+.bar-top{font-size:11px;font-weight:800;color:var(--txt);margin-bottom:4px;font-family:'Space Mono',monospace}
+.bar-rect{width:75%;max-width:56px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#818cf8,#6366f1);transition:all .18s;min-height:3px}
+.bar-btm{margin-top:8px;text-align:center}
+.bar-lbl{font-size:10px;font-weight:700;color:var(--muted);line-height:1.35}
+.bar-elig{font-size:9px;color:var(--muted2);margin-top:1px}
+
+/* ── WEEK PILLS ── */
+.pills-row{display:flex;gap:8px;overflow-x:auto;margin-bottom:22px;padding-bottom:2px;scrollbar-width:thin}
+.wpill{flex-shrink:0;min-width:130px;background:var(--card);border:1.5px solid var(--bdr);border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .15s}
+.wpill:hover{border-color:#6366f1;background:#f5f3ff}
+.wpill.active{border-color:var(--pr);background:#eef2ff;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.wpill-lbl{font-size:10.5px;font-weight:700;color:var(--txt);white-space:nowrap}
+.wpill-pay{font-size:17px;font-weight:900;color:var(--ok);margin:3px 0;font-family:'Space Mono',monospace}
+.wpill-ct{font-size:10px;color:var(--muted);font-weight:500}
+
+/* ── SECTION HDR ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+
+/* ── BONUS BANNER ── */
+.bonus-banner{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:16px;padding:18px 22px;border:2px solid #334155;margin-bottom:20px}
+.bb-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);margin-bottom:12px}
+.bb-grid{display:flex;gap:10px;flex-wrap:wrap}
+.bb-person{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 14px;min-width:180px;flex:1}
+.bb-name{font-weight:900;font-size:13px;color:#f8fafc;flex:1}
+.bb-meta{font-size:10px;color:var(--muted2);margin-top:1px}
+.bb-badge{padding:2px 9px;border-radius:20px;font-size:9.5px;font-weight:900;text-transform:uppercase;white-space:nowrap}
+.bb-e{background:#fef9c3;color:#854d0e;border:1.5px solid #fde047}
+.bb-h{background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd}
+.bb-b{background:#f0fdf4;color:#166534;border:1.5px solid #86efac}
+.bb-pay{font-size:14px;font-weight:900;color:#34d399;font-family:'Space Mono',monospace}
+.bb-none{color:var(--muted2);font-size:13px;text-align:center;padding:16px 0}
+
+/* ── ASSOCIATE CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.acard{background:var(--card);border-radius:14px;padding:16px;border:2px solid var(--bdr);position:relative;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.acard:hover,.acard.pin{border-color:var(--pr);transform:translateY(-2px);box-shadow:0 8px 20px rgba(79,70,229,.1);z-index:50}
+.acard.pin{border-color:var(--ok)}
+.acard.qual{background:#fafafe;border-color:rgba(79,70,229,.3)}
+.ac-name{font-size:13px;font-weight:800;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ac-role{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--pr);background:#eff6ff;padding:2px 6px;border-radius:20px;border:1px solid #bfdbfe}
+.tb{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:800;text-transform:uppercase;margin:4px 0 8px}
+.tb-e{background:#fef9c3;color:#854d0e;border:1.5px solid #fde047}
+.tb-h{background:#dbeafe;color:#1e40af;border:1.5px solid #93c5fd}
+.tb-b{background:#f0fdf4;color:#166534;border:1.5px solid #86efac}
+.pr-row{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;font-weight:600;color:var(--muted);align-items:center}
+.pr-pct{font-family:'Space Mono',monospace;font-size:12px;font-weight:800;padding:1px 6px;border-radius:5px;background:var(--inner);border:1px solid var(--bdr)}
+.ph{color:var(--ok)!important}.pw{color:var(--warn)!important}.pl{color:var(--bad)!important}
+.avg-row{margin-top:8px;padding-top:6px;border-top:1px dashed var(--bdr);display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--muted)}
+.it-blk{margin-top:10px;padding-top:8px;border-top:1px dashed var(--bdr)}
+.it-hd{display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.it-pct-lbl{font-family:'Space Mono',monospace;color:var(--pr);font-weight:900}
+.it-trk{height:8px;background:var(--bdr);border-radius:50px;overflow:hidden;display:flex}
+.s-it{height:100%;background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.s-ni{height:100%;background:linear-gradient(90deg,#fb923c,#ea580c)}
+.s-it.only{border-radius:50px}.s-it.wn{border-radius:50px 0 0 50px}.s-ni.lst{border-radius:0 50px 50px 0}
+.it-trk.done .s-it{background:linear-gradient(90deg,#10b981,#059669)}
+.it-trk.done .s-ni{background:linear-gradient(90deg,#34d399,#059669)}
+.it-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:4px;display:flex;justify-content:space-between}
+.ni-lbl{color:#ea580c;font-weight:700}
+
+/* ── TOOLTIP ── */
+.tt{display:none;position:absolute;bottom:105%;left:50%;transform:translateX(-50%);width:370px;background:#1e293b;color:#fff;padding:18px;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,.45);border:3px solid var(--pr);z-index:999}
+.acard:hover .tt,.acard.pin .tt{display:block;animation:fi .15s ease-out}
+.acard.pin .tt{border-color:var(--ok)}
+.tt::after{content:'';position:absolute;top:100%;left:50%;margin-left:-9px;border:9px solid transparent;border-top-color:var(--pr)}
+.acard.pin .tt::after{border-top-color:var(--ok)}
+@keyframes fi{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.tt-name{font-size:15px;font-weight:900;margin-bottom:9px;text-align:center}
+.tt-meta{display:flex;flex-direction:column;gap:4px;font-size:11px;color:#cbd5e1;background:rgba(255,255,255,.05);padding:9px;border-radius:8px;margin-bottom:12px}
+.tt-meta .r{display:flex;justify-content:space-between}
+.tt-meta .r span:last-child{color:#fff;font-weight:700}
+.tt-pr{display:flex;justify-content:space-between;font-size:12px;color:#f8fafc;margin-bottom:6px;align-items:center;border-bottom:1px dashed rgba(255,255,255,.12);padding-bottom:4px;font-weight:600}
+.tt-pr .v{font-weight:800;font-family:'Space Mono',monospace}
+.tt-pr-sub{font-size:9.5px;color:#94a3b8;margin:-4px 0 6px;font-family:'Space Mono',monospace}
+.tt-avg{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:#f8fafc;padding:5px 0 10px;border-top:2px dashed rgba(255,255,255,.15);margin-top:2px}
+.tt-box{margin-top:10px;padding:9px 11px;border-radius:9px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
+.tt-box-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:5px}
+.tt-bc{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;font-weight:700}
+.tt-bc.ok{color:#34d399}.tt-bc.fail{color:#f87171}
+.tt-qual{color:#34d399;font-size:11px;font-weight:800;margin-top:5px;text-align:center;padding:4px;background:rgba(52,211,153,.12);border-radius:6px}
+.tt-no{color:#f87171;font-size:10px;font-weight:700;margin-top:5px;text-align:center}
+.tt-it{margin-top:10px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.12)}
+.tt-it-row{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:4px;font-weight:600}
+.tt-it-trk{height:7px;background:rgba(255,255,255,.1);border-radius:50px;overflow:hidden;display:flex}
+.ts-it{height:100%;background:linear-gradient(90deg,#3b82f6,#1d4ed8)}
+.ts-ni{height:100%;background:linear-gradient(90deg,#fb923c,#ea580c)}
+.ts-it.only{border-radius:50px}.ts-it.wn{border-radius:50px 0 0 50px}.ts-ni.lst{border-radius:0 50px 50px 0}
+.tt-it-trk.done .ts-it{background:linear-gradient(90deg,#10b981,#059669)}
+.tt-it-sub{font-size:9.5px;color:#94a3b8;margin-top:3px;font-family:'Space Mono',monospace;display:flex;justify-content:space-between}
+
+/* ── LEADERBOARD ── */
+.lb-wrap{background:var(--card);border-radius:14px;border:1px solid var(--bdr);overflow:hidden;margin-bottom:20px}
+.lb-hdr{display:grid;grid-template-columns:36px 1fr 90px 80px 80px 80px;gap:0;padding:9px 16px;background:#f9fafb;border-bottom:2px solid var(--bdr);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.lb-row{display:grid;grid-template-columns:36px 1fr 90px 80px 80px 80px;gap:0;padding:11px 16px;border-bottom:1px solid #f9fafb;align-items:center;transition:background .1s}
+.lb-row:hover{background:#fafafe}
+.lb-row:last-child{border-bottom:none}
+.lb-rank{font-size:13px;font-weight:800;color:#d1d5db;text-align:center}
+.lb-rank.g{color:#f59e0b}.lb-rank.s{color:#94a3b8}.lb-rank.br{color:#b45309}
+.lb-name{font-size:13px;font-weight:800;color:var(--txt)}
+.lb-role{font-size:10px;color:var(--muted);margin-top:1px}
+.lb-wks{font-size:12px;font-weight:700;color:var(--txt);font-family:'Space Mono',monospace;text-align:center}
+.lb-tc{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.ltc{padding:1px 5px;border-radius:8px;font-size:9px;font-weight:800}
+.ltce{background:#fef9c3;color:#854d0e;border:1px solid #fde047}
+.ltch{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+.ltcb{background:#f0fdf4;color:#166534;border:1px solid #86efac}
+.lb-avg{font-size:12px;font-weight:700;font-family:'Space Mono',monospace;text-align:right;color:var(--txt)}
+.lb-total{font-size:13px;font-weight:900;color:var(--ok);font-family:'Space Mono',monospace;text-align:right}
+.lb-bar-wrap{padding:0 4px}
+.lb-bar-bg{height:4px;background:#f3f4f6;border-radius:50px;overflow:hidden}
+.lb-bar-fill{height:100%;background:linear-gradient(90deg,var(--pr),#818cf8);border-radius:50px}
+.lb-footer{display:grid;grid-template-columns:36px 1fr 90px 80px 80px 80px;gap:0;padding:9px 16px;background:#eef2ff;border-top:2px solid #c7d2fe;font-size:11px;font-weight:800;color:var(--pr)}
+
+/* ── MODAL ── */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:300;align-items:center;justify-content:center;padding:20px}
+.moverlay.show{display:flex}
+.modal{background:var(--card);border-radius:18px;padding:28px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,.2)}
+.m-title{font-size:16px;font-weight:900;margin-bottom:3px}
+.m-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.55}
+.m-hint{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 13px;font-size:11px;color:#0369a1;font-weight:600;margin-bottom:14px;line-height:1.75}
+.m-hint code{background:#e0f2fe;padding:1px 5px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px}
+.m-row{display:flex;gap:10px;margin-bottom:10px}
+.m-field{flex:1}
+.m-field label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.m-field input{width:100%;padding:8px 11px;border:1.5px solid var(--bdr);border-radius:8px;font-size:13px;font-family:'Space Mono',monospace;color:var(--txt)}
+.m-field input:focus{outline:none;border-color:#6366f1}
+.dz{border:2px dashed #d1d5db;border-radius:10px;padding:24px 20px;text-align:center;cursor:pointer;background:var(--inner);transition:all .2s;position:relative;margin-bottom:10px}
+.dz:hover,.dz.hover{border-color:#6366f1;background:#f5f3ff}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz.ok{border-color:var(--ok);background:#f0fdf4}
+.dz-icon{font-size:26px;margin-bottom:5px}
+.dz-lbl{font-size:13px;font-weight:700;color:#6366f1}
+.dz.ok .dz-lbl{color:var(--ok)}
+.dz-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.dz-fn{font-size:11px;color:var(--ok);font-weight:700;margin-top:4px;font-family:'Space Mono',monospace}
+.merr{background:#fef2f2;border-left:4px solid var(--bad);border-radius:6px;padding:8px 12px;font-size:12px;color:#991b1b;font-weight:700;margin-bottom:8px;display:none}
+.merr.show{display:block}
+.m-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.m-cancel{padding:8px 16px;border:1.5px solid var(--bdr);border-radius:8px;background:var(--card);font-size:12px;font-weight:700;cursor:pointer;color:var(--txt);font-family:'Inter',sans-serif}
+.m-cancel:hover{background:var(--inner)}
+.m-add{padding:8px 18px;border:none;border-radius:8px;background:var(--pr);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+.m-add:hover:not(:disabled){background:var(--pr-d)}
+.m-add:disabled{background:#c7d2fe;cursor:not-allowed}
+
+@media(max-width:900px){.ov-grid{grid-template-columns:repeat(2,1fr)}.bars-area{height:140px}}
+@media print{.nav,.nbtn,.pills-row{display:none!important}.main{padding:0}}
+
+/* Shared-file overrides */
+body{background:var(--bg)}
+.share-nav{display:flex;align-items:center;background:linear-gradient(135deg,#1e1b4b,#312e81);padding:0 24px;height:58px;gap:12px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.share-nav-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.share-nav-logo{font-size:24px}
+.share-nav-title{font-size:15px;font-weight:800;color:#fff}
+.share-nav-sub{font-size:10px;color:#a5b4fc;font-weight:600;margin-top:1px}
+.share-nbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);font-family:'Inter',sans-serif;white-space:nowrap;transition:all .15s}
+.share-nbtn:hover{background:rgba(255,255,255,.18)}
+.share-nbtn.teal{background:rgba(6,182,212,.25);border-color:rgba(6,182,212,.5);color:#67e8f9}
+.share-nbtn.teal:hover{background:rgba(6,182,212,.4)}
+</style>
+</head>
+<body>
+<div class="share-nav">
+  <div class="share-nav-brand">
+    <span class="share-nav-logo">📦</span>
+    <div>
+      <div class="share-nav-title">Returns Team — Bonus Hub</div>
+      <div class="share-nav-sub">Toronto Operations · Shared View</div>
+    </div>
+  </div>
+  <button class="share-nbtn teal" onclick="exportBonusCSV()">⬇ Export Bonus CSV</button>
+  <button class="share-nbtn" onclick="window.print()">⎙ Print</button>
+</div>
+
+<div class="main" id="main-wrap">
+  <div class="ov-grid" id="ov-grid"></div>
+  <div class="chart-card" id="chart-card"></div>
+  <div class="pills-row" id="pills-row"></div>
+  <div id="week-detail">
+    <div class="sec-hdr">
+      <div class="sec-title" id="wk-title">Loading…</div>
+      <div style="font-size:13px;font-weight:800;color:var(--ok);font-family:'Space Mono',monospace" id="wk-pay"></div>
+    </div>
+    <div id="bonus-banner"></div>
+    <div class="sec-hdr"><div class="sec-title">Associates This Week</div></div>
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+  <div style="margin-top:28px">
+    <div class="sec-hdr">
+      <div class="sec-title">All-Time Leaderboard</div>
+      <div style="display:flex;gap:6px" id="lb-sort-btns"></div>
+    </div>
+    <div class="lb-wrap" id="lb-wrap"></div>
+  </div>
+</div>
+
+<script>
+// ── BAKED DATA (all weeks embedded — no server or localStorage needed) ──
+const BAKED_WEEKS = [{"id":1782470431226,"label":"27 Apr – 3 May","dateFrom":"2026-04-27","dateTo":"2026-05-03","savedAt":"2026-06-26T10:40:31.226Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Move Sortly Item,12,12%,98,00:49:00,00:57:00,00:00:00,4,15-Dec-25\r\n,,,Sortly Create Skids,41,35%,118.7,01:29:00,,,,\r\nHarsimran Singh,M,Returns,Move Sortly Item,240,46%,526,04:23:00,31:18:00,00:00:00,5,10-Jun-24\r\n,,,Sortly Create Skids,348,100%,346.7,04:20:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,590,135%,436.4,36:22:00,10:28:00,36:22:00,6,23-Jul-24\r\n,,,Move Cancelled Items,3,14%,21,00:36:00,,,,\r\n,,,Move Sortly Item,0,0%,14,00:07:00,,,,\r\nHemant Gupta,M,Returns,Customer Return,390,124%,315.6,26:18:00,15:20:00,26:18:00,6,13-May-24\r\n,,,Move Sortly Item,38,34%,112,00:56:00,,,,\r\n,,,Sortly Create Skids,60,31%,190.7,02:23:00,,,,\r\n"},{"id":1782470458790,"label":"4 May – 10 May","dateFrom":"2026-05-04","dateTo":"2026-05-10","savedAt":"2026-06-26T10:40:58.790Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Customer Return,79,72%,109,09:05:00,00:00:00,09:05:00,5,15-Dec-25\r\n,,,Move Cancelled Items,0,0%,16.3,00:28:00,,,,\r\n,,,Sortly Create Skids,0,0%,10.7,00:08:00,,,,\r\nHarsimran Singh,M,Returns,Customer Return,27,82%,33,02:45:00,29:53:00,02:45:00,5,10-Jun-24\r\n,,,Move Cancelled Items,396,148%,268.3,07:40:00,,,,\r\n,,,Move Sortly Item,938,59%,1600,13:20:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,601,170%,354.2,29:31:00,10:04:00,29:31:00,7,23-Jul-24\r\nHemant Gupta,M,Returns,Stowing,9,18%,50.9,00:47:00,15:05:00,23:09:00,7,13-May-24\r\n,,,Customer Return,408,152%,268.4,22:22:00,,,,\r\n,,,Move Cancelled Items,88,117%,75.3,02:09:00,,,,\r\n"},{"id":1782470470965,"label":"11 May – 17 May","dateFrom":"2026-05-11","dateTo":"2026-05-17","savedAt":"2026-06-26T10:41:10.965Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\n,,,Move Cancelled Items,0,0%,14,00:24:00,,,,\r\nJeffery Morgan,M,Returns,Customer Return,37,77%,48.2,04:01:00,00:00:00,04:01:00,6,15-Dec-25\r\n,,,Move Sortly Item,284,50%,564,04:42:00,,,,\r\n,,,Sortly Create Skids,72,23%,313.3,03:55:00,,,,\r\nHarsimran Singh,M,Returns,Move Sortly Item,700,44%,1598,13:19:00,32:27:00,00:00:00,6,10-Jun-24\r\n,,,Sortly Create Skids,409,67%,613.3,07:40:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,228,154%,147.6,12:18:00,17:16:00,12:18:00,6,23-Jul-24\r\n,,,Move Cancelled Items,56,113%,49.6,01:25:00,,,,\r\n,,,Move Sortly Item,802,46%,1756,14:38:00,,,,\r\n,,,Sortly Create Skids,2,15%,13.3,00:10:00,,,,\r\nHemant Gupta,M,Returns,Customer Return,225,131%,171.8,14:19:00,12:05:00,14:19:00,6,13-May-24\r\n,,,Move Cancelled Items,47,110%,42.6,01:13:00,,,,\r\n,,,Move Sortly Item,98,64%,154,01:17:00,,,,\r\n,,,Sortly Create Skids,479,47%,1025.3,12:49:00,,,,\r\n"},{"id":1782470483710,"label":"18 May – 24 May","dateFrom":"2026-05-18","dateTo":"2026-05-24","savedAt":"2026-06-26T10:41:23.710Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Customer Return,22,239%,9.2,00:46:00,00:00:00,00:46:00,4,15-Dec-25\r\n,,,Sortly Create Skids,103,46%,224,02:48:00,,,,\r\nHarsimran Singh,M,Returns,Move Sortly Item,448,47%,946,07:53:00,38:52:00,00:00:00,5,10-Jun-24\r\n,,,Sortly Create Skids,208,68%,305.3,03:49:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,557,167%,332.6,27:43:00,04:29:00,27:43:00,4,23-Jul-24\r\nHemant Gupta,M,Returns,Customer Return,802,170%,471,39:15:00,04:55:00,39:15:00,6,13-May-24\r\n"},{"id":1782470496533,"label":"25 May – 31 May","dateFrom":"2026-05-25","dateTo":"2026-05-31","savedAt":"2026-06-26T10:41:36.533Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Move Sortly Item,12,12%,98,00:49:00,00:57:00,00:00:00,4,15-Dec-25\r\n,,,Sortly Create Skids,41,35%,118.7,01:29:00,,,,\r\nHarsimran Singh,M,Returns,Move Sortly Item,240,46%,526,04:23:00,31:18:00,00:00:00,5,10-Jun-24\r\n,,,Sortly Create Skids,348,100%,346.7,04:20:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,590,135%,436.4,36:22:00,10:28:00,36:22:00,6,23-Jul-24\r\n,,,Move Cancelled Items,3,14%,21,00:36:00,,,,\r\n,,,Move Sortly Item,0,0%,14,00:07:00,,,,\r\nHemant Gupta,M,Returns,Customer Return,390,124%,315.6,26:18:00,15:20:00,26:18:00,6,13-May-24\r\n,,,Move Sortly Item,38,34%,112,00:56:00,,,,\r\n,,,Sortly Create Skids,60,31%,190.7,02:23:00,,,,\r\n"},{"id":1782470506909,"label":"1 Jun – 7 Jun","dateFrom":"2026-06-01","dateTo":"2026-06-07","savedAt":"2026-06-26T10:41:46.909Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Sortly Create Skids,29,32%,92,01:09:00,00:00:00,00:00:00,5,15-Dec-25\r\n,,,Move Extra Items,0,0%,16.3,00:28:00,,,,\r\nHarsimran Singh,M,Returns,Move Sortly Item,134,28%,472,03:56:00,40:01:00,00:00:00,7,10-Jun-24\r\n,,,Sortly Create Skids,332,51%,657.3,08:13:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,494,139%,355.4,29:37:00,10:31:00,29:37:00,5,23-Jul-24\r\nHemant Gupta,M,Returns,Customer Return,253,116%,218.8,18:14:00,12:50:00,18:14:00,6,13-May-24\r\n,,,Move Sortly Item,429,55%,782,06:31:00,,,,\r\n,,,Sortly Create Skids,37,19%,197.3,02:28:00,,,,\r\n"},{"id":1782470515301,"label":"8 Jun – 14 Jun","dateFrom":"2026-06-08","dateTo":"2026-06-14","savedAt":"2026-06-26T10:41:55.301Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Customer Return,163,113%,144.2,12:01:00,00:00:00,12:01:00,5,15-Dec-25\r\n,,,Move Cancelled Items,1,86%,1.2,00:02:00,,,,\r\n,,,Sortly Create Skids,425,85%,500,06:15:00,,,,\r\nHarsimran Singh,M,Returns,Customer Return,107,113%,94.6,07:53:00,27:02:00,07:53:00,6,10-Jun-24\r\n,,,Move Sortly Item,116,95%,122,01:01:00,,,,\r\n,,,Sortly Create Skids,321,56%,577.3,07:13:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,437,149%,293.4,24:27:00,06:16:00,24:27:00,4,23-Jul-24\r\n,,,Sortly Create Skids,8,120%,6.7,00:05:00,,,,\r\nHemant Gupta,M,Returns,Scanning,2,100%,2,00:01:00,24:00:00,00:01:00,5,13-May-24\r\n,,,Move Sortly Item,3,6%,50,00:25:00,,,,\r\n,,,Sortly Create Skids,105,16%,677.3,08:28:00,,,,\r\n"},{"id":1782470528157,"label":"15 Jun – 21 Jun","dateFrom":"2026-06-15","dateTo":"2026-06-21","savedAt":"2026-06-26T10:42:08.157Z","csvText":"Name,Shift,Role ,Process,Productivity,Productivity %,Productivity Benchmark,IT Hours,NON IT Hours,Total IT Hours,Working days,Date of Joining\r\nJeffery Morgan,M,Returns,Customer Return,151,95%,159.4,13:17:00,00:00:00,13:17:00,5,15-Dec-25\r\n,,,Move Cancelled Items,3,129%,2.3,00:04:00,,,,\r\n,,,Move Sortly Item,44,31%,140,01:10:00,,,,\r\nHarsimran Singh,M,Returns,Customer Return,18,122%,14.8,01:14:00,36:14:00,01:14:00,5,10-Jun-24\r\n,,,Move Sortly Item,625,75%,832,06:56:00,,,,\r\n,,,Sortly Create Skids,487,70%,693.3,08:40:00,,,,\r\nPritpal Singh,M,Returns,Customer Return,349,144%,242,20:10:00,12:06:00,20:10:00,4,23-Jul-24\r\nHemant Gupta,M,Returns,Move Sortly Item,147,38%,382,03:11:00,08:00:00,00:00:00,5,13-May-24\r\n,,,Sortly Create Skids,65,15%,424,05:18:00,,,,\r\n"}];
+
+
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+const RETURNS_BENCH = {
+  'customer return':      12,
+  'move cancelled items': 35,
+  'move sortly item':     120,
+  'move extra items':     35,
+  'sortly create skids':  80,
+};
+const RATE_DISPLAY = {
+  'customer return':'12/hr','move cancelled items':'35/hr',
+  'move sortly item':'120/hr','move extra items':'35/hr','sortly create skids':'80/hr'
+};
+const PROC_LABEL = {
+  'customer return':'Customer Return','move cancelled items':'Move Cancelled Items',
+  'move sortly item':'Move Sortly Item','move extra items':'Move Extra Items',
+  'sortly create skids':'Sortly Create Skids'
+};
+const IT_DAY = 6.5;
+const BONUS_TIERS = [{tier:'Elite',min:130,pay:125},{tier:'High',min:110,pay:95},{tier:'Base',min:100,pay:50}];
+const BBCLS = {Elite:'bb-e',High:'bb-h',Base:'bb-b'};
+const TBCLS = {Elite:'tb-e',High:'tb-h',Base:'tb-b'};
+const LTCCLS = {Elite:'ltce',High:'ltch',Base:'ltcb'};
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let weeks = [];   // [{id,label,dateFrom,dateTo,scored,qualifiers,totalPay}]
+let selIdx = 0;
+let lbSort = 'total';
+let pendingCSV = null;
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function hms(s){if(!s||!s.trim())return 0;const p=s.trim().split(':');if(p.length===3)return+p[0]+(+p[1])/60+(+p[2])/3600;if(p.length===2)return+p[0]+(+p[1])/60;return parseFloat(s)||0;}
+function fmtH(h){const hh=Math.floor(h),mm=Math.round((h-hh)*60);return hh+'h '+String(mm<60?mm:0).padStart(2,'0')+'m';}
+function rpct(q,t){return t>0?Math.round(q/t*100):0;}
+function clr(p){return p>=100?'ph':p>=80?'pw':'pl';}
+function fmtDate(s){try{return new Date(s+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return s;}}
+function fmtShort(s){try{const d=new Date(s+'T00:00:00');return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];}catch{return s;}}
+function splitLine(l){const c=[];let s='',q=false;for(const ch of l){if(ch==='"'){q=!q;}else if(ch===','&&!q){c.push(s.trim());s='';}else s+=ch;}c.push(s.trim());return c;}
+function weekLabel(w){return w.dateFrom&&w.dateTo?fmtShort(w.dateFrom)+' – '+fmtShort(w.dateTo)+' '+w.dateFrom.slice(0,4):w.label;}
+
+// ════════════════════════════════════════════════════════
+// EXCLUSION — returns associates ONLY
+// An associate is included ONLY if ALL their scored processes
+// are returns processes (no picking/stowing/packing etc)
+// AND they have at least one returns process row
+// ════════════════════════════════════════════════════════
+function isExcluded(name, role){
+  const r = (role||'').toLowerCase();
+  if(r.includes('supervisor')||r.includes('driver')) return true;
+  if(name.includes('@')) return true;
+  if(/^newhire\d*$/i.test(name.trim())) return true;
+  return false;
+}
+function isReturnsAssociate(raw){
+  // Must have at least one returns process
+  const hasReturns = raw.procs.some(p=>RETURNS_BENCH[p.proc.toLowerCase().trim()]!=null);
+  return hasReturns;
+}
+
+// ════════════════════════════════════════════════════════
+// CSV PARSER
+// ════════════════════════════════════════════════════════
+function parseCSV(txt){
+  const lines = txt.trim().split(/[\r\n]+/);
+  if(!lines.length) return [];
+  const hdrs = splitLine(lines[0]);
+  const ci = (...ns)=>{
+    for(const n of ns){
+      let i=hdrs.findIndex(h=>h.trim().toLowerCase().replace(/[\s_-]/g,'')==n.toLowerCase().replace(/[\s_-]/g,''));
+      if(i>=0)return i;
+      i=hdrs.findIndex(h=>h.trim().toLowerCase().replace(/[\s_-]/g,'').includes(n.toLowerCase().replace(/[\s_-]/g,''))&&!h.toLowerCase().includes('benchmark')&&!h.toLowerCase().includes('%'));
+      if(i>=0)return i;
+    }
+    return -1;
+  };
+  const iName=ci('name','associate'), iShift=ci('shift'), iRole=ci('role'), iProc=ci('process','activity');
+  const iProd=hdrs.findIndex(h=>/^productivity( count)?$/i.test(h.trim()));
+  const iITH=ci('ithours','it hours'), iNIT=ci('nonithours','non it hours','nonit');
+  const iTotIT=ci('totalithours','total it hours'), iDays=ci('workingdays','working days');
+  const iJoin=ci('dateofjoining','date of joining');
+  if(iName<0||iProc<0) throw new Error('Cannot find Name or Process column. Headers: '+hdrs.join(', '));
+
+  const out=[]; let cur=null;
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const c=splitLine(lines[i]);
+    const name=iName>=0?(c[iName]||'').trim():'';
+    if(name){
+      if(cur) out.push(cur);
+      cur={name,shift:iShift>=0?(c[iShift]||'').trim():'M',
+           role:iRole>=0?(c[iRole]||'').trim():'-',
+           nonit:hms(iNIT>=0?c[iNIT]:''),
+           totalit:hms(iTotIT>=0?c[iTotIT]:''),
+           days:iDays>=0?parseInt(c[iDays])||0:0,
+           joined:iJoin>=0?(c[iJoin]||'-').trim():'-',
+           procs:[]};
+    }
+    if(cur){
+      const proc=iProc>=0?(c[iProc]||'').trim():'';
+      const qty=iProd>=0?parseInt(c[iProd])||0:0;
+      const ith=hms(iITH>=0?c[iITH]:'');
+      if(proc) cur.procs.push({proc,qty,ith});
+    }
+  }
+  if(cur) out.push(cur);
+  return out;
+}
+
+// ════════════════════════════════════════════════════════
+// SCORING ENGINE
+// ════════════════════════════════════════════════════════
+function scoreAssociate(raw){
+  const procScores=[];
+  for(const p of raw.procs){
+    const key=p.proc.toLowerCase().trim();
+    const rate=RETURNS_BENCH[key];
+    if(rate==null) continue;  // not a returns process — skip entirely
+    // Always Math.round, never floor
+    const target=Math.round(p.ith*rate*10)/10;
+    const pct=target>0?Math.round(p.qty/target*100):0;
+    procScores.push({key,label:PROC_LABEL[key]||p.proc,qty:p.qty,ith:p.ith,target,pct});
+  }
+  // Simple average of all scored process %s
+  const avg=procScores.length
+    ?Math.round(procScores.reduce((s,p)=>s+p.pct,0)/procScores.length):0;
+
+  // IT compliance = (Total IT + Non-IT) / (days × 6.5)
+  const it=Math.round(raw.totalit*10)/10;
+  const nonit=Math.round(raw.nonit*10)/10;
+  const total=Math.round((it+nonit)*10)/10;
+  const goal=Math.round(raw.days*IT_DAY*10)/10||IT_DAY;
+  const itComp=goal>0?Math.round(total/goal*100):0;
+
+  // Bonus eligibility
+  const hrsReq=raw.days>=5?30:raw.days===4?24:0;
+  const daysOk=raw.days>=4;
+  const hrsOk=hrsReq>0&&total>=hrsReq;
+  const prodOk=avg>100;
+  let tier=null,pay=0;
+  if(daysOk&&hrsOk&&prodOk){
+    for(const t of BONUS_TIERS){if(avg>=t.min){tier=t.tier;pay=t.pay;break;}}
+  }
+  return{name:raw.name,role:raw.role,joined:raw.joined,days:raw.days,
+         procScores,avg,it,nonit,total,goal,itComp,hrsReq,
+         daysOk,hrsOk,prodOk,tier,pay,qualifies:!!tier};
+}
+
+function scoreWeek(csvText){
+  const raw=parseCSV(csvText);
+  return raw
+    .filter(r=>!isExcluded(r.name,r.role) && isReturnsAssociate(r))
+    .map(scoreAssociate);
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+function init(){
+  let raw;
+  try{const st=localStorage.getItem('wh-returns-hub');raw=st?JSON.parse(st):[];}
+  catch{raw=[];}
+  weeks=raw.map(w=>{
+    const scored=scoreWeek(w.csvText);
+    const qualifiers=scored.filter(a=>a.qualifies);
+    return{...w,scored,qualifiers,totalPay:qualifiers.reduce((s,a)=>s+a.pay,0)};
+  }).sort((a,b)=>new Date(a.dateFrom)-new Date(b.dateFrom));
+  selIdx=Math.max(0,weeks.length-1);
+  render();
+}
+function save(){
+  const d=weeks.map(w=>({id:w.id,label:w.label,dateFrom:w.dateFrom,dateTo:w.dateTo,savedAt:w.savedAt,csvText:w.csvText}));
+  localStorage.setItem('wh-returns-hub',JSON.stringify(d));
+}
+
+// ════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════
+function render(){renderOverview();renderChart();renderPills();renderWeekDetail();renderLeaderboard();}
+
+function renderOverview(){
+  if(!weeks.length){
+    document.getElementById('ov-grid').innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;background:var(--card);border-radius:14px;border:2px dashed var(--bdr)">📦 No weeks loaded yet — click <strong>+ Add Week from CSV</strong> to get started</div>`;
+    return;
+  }
+  const grand=weeks.reduce((s,w)=>s+w.totalPay,0);
+  const totalQ=weeks.reduce((s,w)=>s+w.qualifiers.length,0);
+  const unique=new Set(weeks.flatMap(w=>w.qualifiers.map(a=>a.name))).size;
+  const avgWk=weeks.length?Math.round(grand/weeks.length):0;
+  const vc=p=>p>=100?'var(--ok)':p>=80?'var(--warn)':'var(--bad)';
+  const cards=[
+    {lbl:'Total Paid Out',    val:'$'+grand,    sub:weeks.length+' week'+(weeks.length!==1?'s':'')+' tracked',        a:'#10b981',b:'#059669'},
+    {lbl:'Unique Recipients', val:unique,        sub:'associates earned bonus',                                         a:'#6366f1',b:'#4f46e5'},
+    {lbl:'Total Payouts',     val:totalQ,        sub:'bonus events recorded',                                          a:'#f59e0b',b:'#d97706'},
+    {lbl:'Avg / Week',        val:'$'+avgWk,     sub:'weekly payout average',                                         a:'#8b5cf6',b:'#7c3aed'},
+  ];
+  document.getElementById('ov-grid').innerHTML=cards.map(c=>`
+    <div class="ov" style="--a:${c.a};--b:${c.b}">
+      <div class="ov-lbl">${c.lbl}</div>
+      <div class="ov-val">${c.val}</div>
+      <div class="ov-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+function renderChart(){
+  if(!weeks.length){document.getElementById('chart-card').innerHTML='';return;}
+  const totals=weeks.map(w=>w.totalPay);
+  const maxPay=Math.max(...totals,1);
+  const grand=totals.reduce((a,b)=>a+b,0);
+  const gridVals=[...new Set([0,Math.round(maxPay*.33),Math.round(maxPay*.67),maxPay])];
+  const glHtml=gridVals.map(v=>`<div class="gl" style="bottom:${(v/maxPay)*100}%"><span class="gl-lbl">$${v}</span></div>`).join('');
+  const barsHtml=weeks.map((w,i)=>{
+    const h=maxPay>0?(w.totalPay/maxPay*100):0;
+    const lbl=weekLabel(w);
+    return`<div class="bar-col${i===selIdx?' sel':''}" onclick="selectWeek(${i})">
+      <div class="bar-top">$${w.totalPay}</div>
+      <div class="bar-rect" style="height:${Math.max(h,2)}%"></div>
+      <div class="bar-btm"><div class="bar-lbl">${lbl}</div><div class="bar-elig">${w.qualifiers.length} elig</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('chart-card').innerHTML=`
+    <div class="chart-hdr">
+      <div><div class="chart-lbl">Weekly Bonus Payout Trend</div><div class="chart-total">$${grand} <span style="font-size:13px;color:var(--muted);font-weight:600">total</span></div></div>
+      <div class="chart-meta"><b>${weeks.length}</b> week${weeks.length!==1?'s':''} tracked</div>
+    </div>
+    <div class="bars-area"><div class="glines">${glHtml}</div>${barsHtml}</div>`;
+}
+
+function renderPills(){
+  const sorted=[...weeks].map((w,i)=>({...w,origIdx:i})).sort((a,b)=>new Date(b.dateFrom)-new Date(a.dateFrom));
+  document.getElementById('pills-row').innerHTML=sorted.map(w=>`
+    <div class="wpill${w.origIdx===selIdx?' active':''}" onclick="selectWeek(${w.origIdx})">
+      <div class="wpill-lbl">${weekLabel(w)}</div>
+      <div class="wpill-pay">$${w.totalPay}</div>
+      <div class="wpill-ct">${w.qualifiers.length} paid · ${w.scored.length} assoc</div>
+    </div>`).join('');
+}
+
+function selectWeek(i){selIdx=i;renderChart();renderPills();renderWeekDetail();}
+
+function renderWeekDetail(){
+  if(!weeks.length) return;
+  const w=weeks[selIdx];
+  document.getElementById('wk-title').textContent=weekLabel(w);
+  document.getElementById('wk-pay').textContent=`$${w.totalPay} · ${w.qualifiers.length} paid · ${w.scored.length} associates`;
+  renderBonusBanner(w);
+  renderCards(w.scored);
+}
+
+function renderBonusBanner(w){
+  const quals=w.qualifiers;
+  const el=document.getElementById('bonus-banner');
+  if(!quals.length){el.innerHTML=`<div class="bonus-banner"><div class="bb-title">🏆 Weekly Bonus Qualifiers</div><div class="bb-none">No qualifiers this week</div></div>`;return;}
+  el.innerHTML=`<div class="bonus-banner">
+    <div class="bb-title">🏆 Weekly Bonus Qualifiers — ${weekLabel(w)}</div>
+    <div class="bb-grid">${quals.map(a=>`
+      <div class="bb-person">
+        <div><div class="bb-name">${a.name}</div><div class="bb-meta">${a.avg}% avg · ${a.days}d · ${a.total}h total</div></div>
+        <span class="bb-badge ${BBCLS[a.tier]}">${a.tier}</span>
+        <span class="bb-pay">$${a.pay}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderCards(scored){
+  const sorted=[...scored].sort((a,b)=>(b.qualifies?1:0)-(a.qualifies?1:0)||b.avg-a.avg);
+  document.getElementById('cards-grid').innerHTML=sorted.map(a=>{
+    const itBar=Math.min(a.it/a.goal*100,100);
+    const niBar=Math.min(a.nonit/a.goal*100,100-itBar);
+    const seg=a.nonit>0
+      ?`<div class="s-it wn" style="width:${itBar.toFixed(1)}%"></div><div class="s-ni lst" style="width:${niBar.toFixed(1)}%"></div>`
+      :`<div class="s-it only" style="width:${Math.min(itBar,100).toFixed(1)}%"></div>`;
+    const ttSeg=a.nonit>0
+      ?`<div class="ts-it wn" style="width:${itBar.toFixed(1)}%"></div><div class="ts-ni lst" style="width:${niBar.toFixed(1)}%"></div>`
+      :`<div class="ts-it only" style="width:${Math.min(itBar,100).toFixed(1)}%"></div>`;
+    const itSub=a.nonit>0?`${a.it}h IT + <span class="ni-lbl">${a.nonit}h Non-IT</span> = ${a.total}h`:`${a.it}h IT`;
+    const ttItSub=a.nonit>0?`${a.it}h IT + ${a.nonit}h Non-IT = ${a.total}h`:`${a.total}h IT`;
+    const badge=a.tier?`<div class="tb ${TBCLS[a.tier]}">◆ ${a.tier} · $${a.pay}/wk</div>`:'';
+    const hrs=a.nonit>0?`${a.it}h IT + ${a.nonit}h Non-IT = ${a.total}h`:`${a.total}h`;
+    const reason=!a.daysOk?`Only ${a.days}d — need ≥4`:!a.hrsOk?`${a.total}h of ${a.hrsReq}h needed`:`Avg prod ${a.avg}% — need >100%`;
+    const bonusDetail=a.qualifies
+      ?`<div class="tt-qual">✓ ${a.tier} — $${a.pay}/wk · avg ${a.avg}%</div>`
+      :`<div class="tt-no">Not eligible — ${reason}</div>`;
+    const ttProcs=a.procScores.map(p=>`
+      <div class="tt-pr"><span>${p.label}</span><span class="v ${clr(p.pct)}">${p.qty} / ${p.target.toFixed(1)} (${p.pct}%)</span></div>
+      <div class="tt-pr-sub">IT: ${fmtH(p.ith)} · Rate: ${RATE_DISPLAY[p.key]||''}</div>`).join('');
+    const faceProcs=a.procScores.map(p=>
+      `<div class="pr-row"><span>${p.label}</span><span class="pr-pct ${clr(p.pct)}">${p.pct}%</span></div>`).join('');
+    const avgLine=a.procScores.length>1
+      ?`<div class="avg-row"><span>Avg Productivity</span><span class="${clr(a.avg)}">${a.avg}%</span></div>`:'';
+
+    return`<div class="acard${a.qualifies?' qual':''}" onclick="this.classList.toggle('pin')">
+      <div class="tt">
+        <div class="tt-name">${a.name}</div>
+        <div class="tt-meta">
+          <div class="r"><span>Role</span><span>${a.role||'Returns'}</span></div>
+          <div class="r"><span>Joined</span><span>${a.joined}</span></div>
+          <div class="r"><span>Days</span><span>${a.days}</span></div>
+          <div class="r"><span>IT Goal</span><span>${a.goal}h</span></div>
+        </div>
+        ${ttProcs}
+        ${a.procScores.length>1?`<div class="tt-avg"><span>Avg Productivity</span><span class="${clr(a.avg)}">${a.avg}%</span></div>`:''}
+        <div class="tt-box">
+          <div class="tt-box-title">Bonus Eligibility</div>
+          <div class="tt-bc ${a.daysOk?'ok':'fail'}"><span>${a.daysOk?'✔':'✘'} Days</span><span>${a.days} (min 4)</span></div>
+          <div class="tt-bc ${a.hrsOk?'ok':'fail'}"><span>${a.hrsOk?'✔':'✘'} Hours</span><span>${hrs} / ${a.hrsReq}h</span></div>
+          <div class="tt-bc ${a.prodOk?'ok':'fail'}"><span>${a.prodOk?'✔':'✘'} Avg Prod</span><span>${a.avg}% (>100%)</span></div>
+          ${bonusDetail}
+        </div>
+        <div class="tt-it">
+          <div class="tt-it-row"><span>IT Compliance</span><span>${a.itComp}%</span></div>
+          <div class="tt-it-trk ${a.itComp>=100?'done':''}">${ttSeg}</div>
+          <div class="tt-it-sub"><span>${ttItSub}</span><span>Goal: ${a.goal}h</span></div>
+        </div>
+      </div>
+      <div class="ac-name"><span>${a.name}</span><span class="ac-role">${a.role||'Returns'}</span></div>
+      ${badge}
+      ${faceProcs}
+      ${avgLine}
+      <div class="it-blk">
+        <div class="it-hd"><span class="it-lbl">IT Compliance</span><span class="it-pct-lbl">${a.itComp}%</span></div>
+        <div class="it-trk ${a.itComp>=100?'done':''}">${seg}</div>
+        <div class="it-sub"><span>${itSub}</span><span>Goal: ${a.goal}h</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// LEADERBOARD
+// ════════════════════════════════════════════════════════
+function setLbSort(s){lbSort=s;renderLeaderboard();}
+
+function renderLeaderboard(){
+  const sortBtns=[
+    {s:'total',l:'$ Earned'},{s:'weeks',l:'Weeks Paid'},{s:'avg',l:'Avg Prod'}
+  ];
+  document.getElementById('lb-sort-btns').innerHTML=sortBtns.map(b=>
+    `<button onclick="setLbSort('${b.s}')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid ${lbSort===b.s?'var(--pr)':'var(--bdr)'};background:${lbSort===b.s?'var(--pr)':'var(--card)'};color:${lbSort===b.s?'#fff':'var(--muted)'};font-family:'Inter',sans-serif">${b.l}</button>`
+  ).join('');
+
+  const map={};
+  weeks.sort((a,b)=>new Date(a.dateFrom)-new Date(b.dateFrom)).forEach(w=>{
+    const wlbl=weekLabel(w);
+    (w.qualifiers||[]).forEach(a=>{
+      if(!map[a.name])map[a.name]={name:a.name,role:a.role,weeks:0,totalPay:0,avgSum:0,tC:{Elite:0,High:0,Base:0},lastWeek:'',history:[]};
+      const r=map[a.name];
+      r.weeks++;r.totalPay+=a.pay;r.avgSum+=a.avg;
+      r.tC[a.tier]=(r.tC[a.tier]||0)+1;r.lastWeek=wlbl;
+      r.history.push({wlbl,tier:a.tier,pay:a.pay,avg:a.avg});
+    });
+  });
+
+  let recs=Object.values(map);
+  if(lbSort==='total')      recs.sort((a,b)=>b.totalPay-a.totalPay);
+  else if(lbSort==='weeks') recs.sort((a,b)=>b.weeks-a.weeks||b.totalPay-a.totalPay);
+  else if(lbSort==='avg')   recs.sort((a,b)=>(b.avgSum/b.weeks)-(a.avgSum/a.weeks));
+
+  const maxPay=Math.max(...recs.map(r=>r.totalPay),1);
+  const tPaid=recs.reduce((s,r)=>s+r.totalPay,0);
+  const tPO=recs.reduce((s,r)=>s+r.weeks,0);
+
+  if(!recs.length){
+    document.getElementById('lb-wrap').innerHTML=`<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No bonus qualifiers yet. Add weeks to see the leaderboard.</div>`;
+    return;
+  }
+
+  const rankCls=(i)=>i===0?'g':i===1?'s':i===2?'br':'';
+  const rankIcon=(i)=>i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+
+  const rows=recs.map((r,i)=>{
+    const avg=Math.round(r.avgSum/r.weeks);
+    const barW=Math.round(r.totalPay/maxPay*100);
+    const tiers=[r.tC.Elite?`<span class="ltc ltce">E×${r.tC.Elite}</span>`:'',r.tC.High?`<span class="ltc ltch">H×${r.tC.High}</span>`:'',r.tC.Base?`<span class="ltc ltcb">B×${r.tC.Base}</span>`:''].filter(Boolean).join('');
+    return`<div class="lb-row">
+      <div class="lb-rank ${rankCls(i)}">${rankIcon(i)}</div>
+      <div><div class="lb-name">${r.name}</div><div class="lb-role">${r.role||'Returns'} · Last: ${r.lastWeek}</div></div>
+      <div class="lb-wks" style="text-align:center">${r.weeks} wk${r.weeks!==1?'s':''}</div>
+      <div class="lb-tc">${tiers}</div>
+      <div class="lb-avg">${avg}%</div>
+      <div>
+        <div class="lb-total">$${r.totalPay}</div>
+        <div class="lb-bar-wrap"><div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${barW}%"></div></div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const footer=`<div class="lb-footer">
+    <span></span><span>${recs.length} associates</span>
+    <span style="text-align:center">${tPO} payouts</span>
+    <span></span><span></span>
+    <span style="text-align:right;color:var(--ok)">$${tPaid}</span>
+  </div>`;
+
+  document.getElementById('lb-wrap').innerHTML=`
+    <div class="lb-hdr">
+      <span>#</span><span>Associate</span>
+      <span style="text-align:center">Weeks Paid</span>
+      <span style="text-align:center">Tiers</span>
+      <span style="text-align:right">Avg Prod</span>
+      <span style="text-align:right">Total Earned</span>
+    </div>
+    ${rows}${footer}`;
+}
+
+// ════════════════════════════════════════════════════════
+// ADD WEEK MODAL
+// ════════════════════════════════════════════════════════
+function openModal(){document.getElementById('modal').classList.add('show');}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  pendingCSV=null;
+  document.getElementById('dz-fn').textContent='';
+  document.getElementById('dz').classList.remove('ok');
+  document.getElementById('btn-add').disabled=true;
+  document.getElementById('m-err').classList.remove('show');
+  document.getElementById('m-start').value='';
+  document.getElementById('m-end').value='';
+}
+function closeModalBg(e){if(e.target===document.getElementById('modal'))closeModal();}
+function dzDrag(e){e.preventDefault();document.getElementById('dz').classList.add('hover');}
+function dzLeave(){document.getElementById('dz').classList.remove('hover');}
+function dzDrop(e){e.preventDefault();dzLeave();const f=e.dataTransfer.files[0];if(f)readF(f);}
+function loadCSV(e){const f=e.target.files[0];if(f)readF(f);}
+function readF(f){
+  const r=new FileReader();
+  r.onload=ev=>{pendingCSV=ev.target.result;document.getElementById('dz-fn').textContent='✓ '+f.name;document.getElementById('dz').classList.add('ok');document.getElementById('btn-add').disabled=false;};
+  r.readAsText(f);
+}
+function addWeek(){
+  const err=document.getElementById('m-err');err.classList.remove('show');
+  try{
+    if(!pendingCSV) throw new Error('No CSV loaded.');
+    const s=document.getElementById('m-start').value;
+    const e=document.getElementById('m-end').value;
+    const autoLbl=s&&e?fmtShort(s)+' – '+fmtShort(e):'New Week';
+    const scored=scoreWeek(pendingCSV);
+    if(!scored.length) throw new Error('No returns associates found. The CSV must contain rows for Customer Return, Move Cancelled Items, Move Sortly Item, Move Extra Items, or Sortly Create Skids.');
+    const qualifiers=scored.filter(a=>a.qualifies);
+    const totalPay=qualifiers.reduce((s,a)=>s+a.pay,0);
+    const w={id:Date.now(),label:autoLbl,dateFrom:s||new Date().toISOString().slice(0,10),
+              dateTo:e||new Date().toISOString().slice(0,10),savedAt:new Date().toISOString(),
+              csvText:pendingCSV,scored,qualifiers,totalPay};
+    weeks.push(w);
+    weeks.sort((a,b)=>new Date(a.dateFrom)-new Date(b.dateFrom));
+    selIdx=weeks.findIndex(x=>x.id===w.id);
+    save();render();closeModal();
+  }catch(e){err.textContent='⚠ '+e.message;err.classList.add('show');}
+}
+
+// ════════════════════════════════════════════════════════
+// EXPORT BONUS CSV
+// ════════════════════════════════════════════════════════
+function exportBonusCSV(){
+  if(!weeks.length){alert('No weeks loaded yet.');return;}
+  const allQuals=weeks.flatMap(w=>
+    (w.qualifiers||[]).map(a=>({...a,weekLabel:weekLabel(w)}))
+  );
+  if(!allQuals.length){alert('No bonus qualifiers found across any weeks.');return;}
+
+  const rows=[['Week','Associate','Role','Days Worked','IT Hours','Non-IT Hours','Total Hours','Avg Productivity','Tier','Payout ($)']];
+  allQuals.forEach(a=>{
+    rows.push([a.weekLabel,a.name,a.role||'Returns',a.days,a.it.toFixed(1),a.nonit.toFixed(1),a.total.toFixed(1),a.avg+'%',a.tier,a.pay]);
+  });
+  // Totals row
+  const tPay=allQuals.reduce((s,a)=>s+a.pay,0);
+  rows.push(['','','','','','','','','TOTAL',tPay]);
+
+  const csv=rows.map(r=>r.map(v=>{const s=String(v);return(s.includes(',')||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\r\n');
+  dl(new Blob([csv],{type:'text/csv;charset=utf-8;'}),'WH_Returns_Bonus_Export.csv');
+}
+
+// ════════════════════════════════════════════════════════
+// DOWNLOAD HTML SNAPSHOT
+// ════════════════════════════════════════════════════════
+function downloadHTML(){
+  if(!weeks.length){alert('No weeks loaded yet — nothing to download.');return;}
+
+  // Bake all week CSV data into the output — no localStorage needed in the shared file
+  const bakedData = JSON.stringify(weeks.map(w=>({
+    id:w.id,label:w.label,dateFrom:w.dateFrom,dateTo:w.dateTo,savedAt:w.savedAt,csvText:w.csvText
+  })));
+
+  // Extract all styling from the live page
+  const styles = Array.from(document.querySelectorAll('style')).map(s=>s.textContent).join('\n');
+  const gfonts = 'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap';
+
+  // Grab all scripts from the live page (scoring engine, renderers, helpers)
+  const allScripts = Array.from(document.querySelectorAll('script:not([src])'))
+    .map(s=>s.textContent).join('\n');
+
+  const out = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Returns Team — Bonus Hub (Shared)</title>
+<link href="${gfonts}" rel="stylesheet">
+<style>
+${styles}
+/* Shared-file overrides */
+body{background:var(--bg)}
+.share-nav{display:flex;align-items:center;background:linear-gradient(135deg,#1e1b4b,#312e81);padding:0 24px;height:58px;gap:12px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.share-nav-brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.share-nav-logo{font-size:24px}
+.share-nav-title{font-size:15px;font-weight:800;color:#fff}
+.share-nav-sub{font-size:10px;color:#a5b4fc;font-weight:600;margin-top:1px}
+.share-nbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);font-family:'Inter',sans-serif;white-space:nowrap;transition:all .15s}
+.share-nbtn:hover{background:rgba(255,255,255,.18)}
+.share-nbtn.teal{background:rgba(6,182,212,.25);border-color:rgba(6,182,212,.5);color:#67e8f9}
+.share-nbtn.teal:hover{background:rgba(6,182,212,.4)}
+</style>
+</head>
+<body>
+<div class="share-nav">
+  <div class="share-nav-brand">
+    <span class="share-nav-logo">📦</span>
+    <div>
+      <div class="share-nav-title">Returns Team — Bonus Hub</div>
+      <div class="share-nav-sub">Toronto Operations · Shared View</div>
+    </div>
+  </div>
+  <button class="share-nbtn teal" onclick="exportBonusCSV()">⬇ Export Bonus CSV</button>
+  <button class="share-nbtn" onclick="window.print()">⎙ Print</button>
+</div>
+
+<div class="main" id="main-wrap">
+  <div class="ov-grid" id="ov-grid"></div>
+  <div class="chart-card" id="chart-card"></div>
+  <div class="pills-row" id="pills-row"></div>
+  <div id="week-detail">
+    <div class="sec-hdr">
+      <div class="sec-title" id="wk-title">Loading…</div>
+      <div style="font-size:13px;font-weight:800;color:var(--ok);font-family:'Space Mono',monospace" id="wk-pay"></div>
+    </div>
+    <div id="bonus-banner"></div>
+    <div class="sec-hdr"><div class="sec-title">Associates This Week</div></div>
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+  <div style="margin-top:28px">
+    <div class="sec-hdr">
+      <div class="sec-title">All-Time Leaderboard</div>
+      <div style="display:flex;gap:6px" id="lb-sort-btns"></div>
+    </div>
+    <div class="lb-wrap" id="lb-wrap"></div>
+  </div>
+</div>
+
+<script>
+// ── BAKED DATA (all weeks embedded — no server or localStorage needed) ──
+const BAKED_WEEKS = ${bakedData};
+
+${allScripts}
+
+// ── INIT from baked data instead of localStorage ──
+function init(){
+  weeks = BAKED_WEEKS.map(w=>{
+    const scored = scoreWeek(w.csvText);
+    const qualifiers = scored.filter(a=>a.qualifies);
+    return{...w, scored, qualifiers, totalPay:qualifiers.reduce((s,a)=>s+a.pay,0)};
+  }).sort((a,b)=>new Date(a.dateFrom)-new Date(b.dateFrom));
+  selIdx = Math.max(0, weeks.length-1);
+  render();
+}
+
+// Disable add/save/restore (read-only shared view)
+function save(){}
+function openModal(){ alert('Add Week is only available in your personal hub file.'); }
+function doRestore(){ alert('Restore is only available in your personal hub file.'); }
+function downloadHTML(){ alert('Download is only available in your personal hub file.'); }
+
+document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('click', function(e){
+  var c = e.target.closest('.acard');
+  if(c) c.classList.toggle('pin');
+});
+<\/script>
+</body>
+</html>`;
+
+  dl(new Blob([out],{type:'text/html;charset=utf-8'}), 'WH_Returns_BonusHub_shared.html');
+}
+
+// ════════════════════════════════════════════════════════
+// BACKUP / RESTORE
+// ════════════════════════════════════════════════════════
+function doBackup(){
+  const d=weeks.map(w=>({id:w.id,label:w.label,dateFrom:w.dateFrom,dateTo:w.dateTo,savedAt:w.savedAt,csvText:w.csvText}));
+  dl(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),`WH_Returns_Hub_backup_${new Date().toISOString().slice(0,10)}.json`);
+}
+function doRestore(){document.getElementById('restore-file').click();}
+function handleRestore(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d))throw new Error('Invalid');
+      localStorage.setItem('wh-returns-hub',ev.target.result);init();}
+    catch(err){alert('Restore failed: '+err.message);}
+  };
+  r.readAsText(f);e.target.value='';
+}
+function dl(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',init);
+
+
+// ── INIT from baked data instead of localStorage ──
+function init(){
+  weeks = BAKED_WEEKS.map(w=>{
+    const scored = scoreWeek(w.csvText);
+    const qualifiers = scored.filter(a=>a.qualifies);
+    return{...w, scored, qualifiers, totalPay:qualifiers.reduce((s,a)=>s+a.pay,0)};
+  }).sort((a,b)=>new Date(a.dateFrom)-new Date(b.dateFrom));
+  selIdx = Math.max(0, weeks.length-1);
+  render();
+}
+
+// Disable add/save/restore (read-only shared view)
+function save(){}
+function openModal(){ alert('Add Week is only available in your personal hub file.'); }
+function doRestore(){ alert('Restore is only available in your personal hub file.'); }
+function downloadHTML(){ alert('Download is only available in your personal hub file.'); }
+
+document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('click', function(e){
+  var c = e.target.closest('.acard');
+  if(c) c.classList.toggle('pin');
+});
+</script>
+</body>
+</html>
