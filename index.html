@@ -176,18 +176,8 @@ body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSyst
   </div>
   <div class="bb" id="bonus-banner"></div>
 
-  <!-- Grand total -->
-  <div style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:14px 18px;margin-bottom:18px">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#0e7490;margin-bottom:4px">Grand Total · 27 Apr – 28 Jun 2026</div>
-          <div style="font-size:26px;font-weight:900;color:var(--fg)">$1,270</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px">across 9 weeks · tiered WPI · WPI≥100% + 24h/30h gate</div></td>
-      <td align="right" valign="middle" style="white-space:nowrap">
-        <div style="font-size:11px;color:var(--muted)">Hemant Gupta <b style="color:#059669">$375</b> (3 wks)</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Pritpal Singh <b style="color:#059669">$895</b> (8 wks)</div>
-      </td>
-    </tr></table>
-  </div>
+  <!-- Grand total — rendered dynamically by renderGrandTotal() -->
+  <div id="grand-total-tile" style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:14px 18px;margin-bottom:18px"></div>
 
 
   <!-- Qualifier cards -->
@@ -556,6 +546,46 @@ function handleFile(file) {
 // ═══════════════════════════════════════════════════
 // RENDERING
 // ═══════════════════════════════════════════════════
+function renderGrandTotal() {
+  const tile = document.getElementById('grand-total-tile');
+  if (!tile || !weeks.length) return;
+
+  // Aggregate across all weeks
+  const grandPay = weeks.reduce((s, w) => s + w.totalPay, 0);
+  const nWeeks   = weeks.length;
+
+  // Date range: earliest dateFrom → latest dateFrom + 6 days
+  const dates = weeks.map(w => new Date(w.dateFrom + 'T00:00:00')).sort((a,b)=>a-b);
+  const fmt = dt => dt.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const startLabel = fmt(dates[0]);
+  const endD = new Date(dates[dates.length-1]); endD.setDate(endD.getDate()+6);
+  const endLabel = fmt(endD);
+
+  // Per-associate totals across all weeks
+  const assocMap = {};
+  weeks.forEach(w => {
+    w.qualifiers.forEach(a => {
+      if (!assocMap[a.name]) assocMap[a.name] = { pay: 0, wks: 0 };
+      assocMap[a.name].pay += a.pay;
+      assocMap[a.name].wks++;
+    });
+  });
+  const assocRows = Object.entries(assocMap)
+    .sort((a,b) => b[1].pay - a[1].pay)
+    .map(([name, s]) =>
+      `<div style="font-size:11px;color:var(--muted);margin-top:2px">${name} <b style="color:#059669">$${s.pay}</b> (${s.wks} wk${s.wks!==1?'s':''})</div>`)
+    .join('');
+
+  tile.innerHTML = `<table width="100%" cellpadding="0" cellspacing="0"><tr>
+    <td>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#0e7490;margin-bottom:4px">Grand Total · ${startLabel} – ${endLabel}</div>
+      <div style="font-size:26px;font-weight:900;color:var(--fg)">$${grandPay.toLocaleString()}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">across ${nWeeks} week${nWeeks!==1?'s':''} · tiered WPI · WPI≥100% + 24h/30h gate</div>
+    </td>
+    <td align="right" valign="middle" style="white-space:nowrap">${assocRows}</td>
+  </tr></table>`;
+}
+
 function render() {
   const hasData = weeks.length > 0;
   document.getElementById('upload-wrap').style.display = hasData ? 'none' : 'block';
@@ -565,6 +595,7 @@ function render() {
   if (selIdx < 0 || selIdx >= weeks.length) selIdx = weeks.length - 1;
   renderPills();
   renderWeek();
+  renderGrandTotal();
 }
 
 function renderPills() {
